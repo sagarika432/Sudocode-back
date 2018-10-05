@@ -6,8 +6,18 @@ var connection = require('../DBconnection');
 
 router.post('/events', function(req,res) {
     console.log(req.body);
-    Teacher.addEvent(req.body.email, req.body.name, req.body.description, req.body.start_day, req.body.start_month, req.body.start_year, req.body.end_day, req.body.end_month, req.body.end_year).then(function(status){
+    var email = req.session.email;
+    Teacher.addEvent(email, req.body.name, req.body.description, req.body.start_day, req.body.start_month, req.body.start_year, req.body.end_day, req.body.end_month, req.body.end_year, req.body.course).then(function(status){
         res.status(200).json('success');
+    });
+});
+
+router.get('/events', function(req, res){
+    connection.query('SELECT * FROM events NATURAL JOIN enrolment WHERE email = ?', req.session.email, function(err, result, field){
+        if(err) throw err;
+        console.log(result);
+        //console.log(result[0]['']);
+        res.json(result);
     });
 });
 
@@ -45,8 +55,8 @@ router.post('/lecture', function(req,res) {
 });
 
 router.get('/attendance', function(req, response){
-    //var email = req.session.email;
-    var email = "test@test.com";
+    var email = req.session.email;
+    //var email = "test@test.com";
     var ans = {
 
     };
@@ -61,7 +71,7 @@ router.get('/attendance', function(req, response){
                         connection.query('SELECT no_of_lectures FROM course WHERE name = ?', [result[index].course], function (err, res, field) {
                             if(err) throw err;
                             ans[result[index].course]["total"] = res[0].no_of_lectures;
-                            ans[result[index].course]["attended"] = result[index].bunked;
+                            ans[result[index].course]["bunked"] = result[index].bunked;
                             //console.log(index + " " + result.length - 1);
                             if (index == (result.length - 1))
                                 response.status(200).json(ans);
@@ -75,21 +85,13 @@ router.get('/attendance', function(req, response){
 
 });
 
-router.get('/events', function(req, res){
-    connection.query('SELECT * FROM events', function(err, result, field){
-        //console.log(result);
-        //console.log(result[0]['']);
-        res.json(result);
-    });
-});
-
 router.post('/reference',  function(req, res){
     var link = req.body.link;
     var desc = req.body.description;
     var topic = req.body.topic;
     var course = req.body.course;
-    //var email = req.session.email;
-    var email = "teacher@teacher.com";
+    var email = req.session.email;
+    //var email = "teacher@teacher.com";
     connection.query('INSERT INTO reference(email, link, description, topic, course) VALUES ?', [[[email, link, desc, topic, course]]], function(err, result, field){
         if(err) throw err;
         res.status(200).end();
@@ -99,8 +101,8 @@ router.post('/reference',  function(req, res){
 router.get('/reference', function(req, res){
     var course = req.query.course;
     console.log(typeof course);
-    //var email = req.session.email;
-    var email = "teacher@teacher.com";
+    var email = req.session.email;
+    //var email = "teacher@teacher.com";
     if(typeof course !== 'undefined') {
         connection.query('SELECT * FROM reference WHERE course = ?', [course], function(err, result, field){
             console.log(result);
