@@ -5,48 +5,58 @@ const rp = require('request-promise');
 const Table = require('cli-table');
 const request = require('request');
 const cheerio = require('cheerio');
+var http = require('http');
+var mysql = require('mysql');
+const bodyParser = require('body-parser');
+const passport = require('passport');
+const session = require('express-session');
+const  bcrypt = require('bcryptjs');
+var passportLocal = require('passport-local').Strategy;
+//var passportHttp =require('passport-http').Strategy;
+var expressSession = require('express-session');
+const app = express();
+
+app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.json());
+//load routes
+const users = require('./routes/users');
 
 
-const fs = require('fs');
-const writeStream = fs.createWriteStream('post.csv');
+//Passport Config
+//require('./config/passport')(passport);
 
-// Write Headers
-writeStream.write(`Title,Link,Date \n`);
-
-
-request('https://github.com/sagarika432', (error, response, html) => {
-  if (!error && response.statusCode == 200) {
-
-    //console.log(html);
-    const $ = cheerio.load(html);
-    const no_repositories = $('.UnderlineNav-body') ;
-    console.log(no_repositories.text());
-
+//express session middleware
+app.use(session({
+    secret: 'secret',
+    resave: true,
+    saveUninitialized: true,
     
-    $('.UnderlineNav-body a').each((i,el)=>{
-       // const item =$(el).text();
-        
-        const key = $(el).attr('title');
-        const x = $(el);
-        //const item1 = $(el).find('span').text();
-        
-        var value='' ;
-        if (x.has('span'))
-            value = (x.children('span').text().replace(/\s\s+/g, ''));
-        else    
-            value ='';
-        console.log(key + " :" + value);
-        
-    });
+}));
 
 
-  }
+
+//Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+//passport.use(new passportHttp(verifyCredentials));
+
+
+
+//Global variables
+
+app.use(function(req,res,next){
+
+    res.locals.result = req.result || null ;
+    next();
 });
 
-let users = [];
+//use routes
+app.use('/users',users);
 
 
-const app = express();
+
+
 
 const port = process.env.PORT || 3500;
 app.listen(port,()=>{
@@ -93,11 +103,6 @@ app.get('/',(req,res) => {
                     
                 
 });
-
-
-
-
-
 
 
 
