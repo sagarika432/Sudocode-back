@@ -10,7 +10,10 @@ router.get('/github/:githandle',(req,res) => {
     url = 'https://github.com/'+ req.params.githandle;
     var json = {
     
-        result : {}
+        result : {
+            name : {} ,
+            value : {}
+        }
         
         };
     request(url, (error, response, html) => {
@@ -36,8 +39,9 @@ router.get('/github/:githandle',(req,res) => {
                                 value ='';
                             console.log(key + " :" + value);
                     
+                           json.result .name = key;
                            
-                            json.result [key] = value;
+                            json.result.value = value;
                             
                         })
                     }
@@ -52,7 +56,9 @@ router.get('/linkedin' , (req,res) => {
     
     var json = {
     
-        result : {}
+        result : {
+            
+        }
         
     };
     request('https://internshala.com/internships/engineering-internship-in-mumbai', (error, response, html) => {
@@ -87,4 +93,46 @@ router.get('/linkedin' , (req,res) => {
  
 
 
+});
+
+
+router.get('/hackathons',(req,res) => {
+    url = 'https://www.hackevents.co/hackathons';
+    var json = {
+    
+        result : {}
+        
+        };
+    request(url, (error, response, html) => {
+    if (!error && response.statusCode == 200) {
+
+
+        //console.log(html);
+        const $ = cheerio.load(html);
+       // const no_repositories = $('.UnderlineNav-body') ;
+      //  console.log(no_repositories.text());
+      
+                 $('.hackathon .info a').each((i,el)=>{
+                           // const item =$(el).text();
+                            
+                            const key = $(el).attr('href');
+                           // const x = $(el)
+                            //const item1 = $(el).find('span').text();
+                            
+                            var value=$(el).text();
+                            //if (x.has('span'))
+                             //   value = (x.children('span').text().replace(/\s\s+/g, ''));
+                           // else    
+                             //   value ='';
+                            console.log(key + " :" + value);
+                    
+                           
+                            json.result [value] = key;
+                            
+                        })
+                    }
+                    res.send(JSON.stringify(json));
+    });
+ 
+    
 });
