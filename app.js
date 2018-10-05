@@ -14,34 +14,7 @@ const writeStream = fs.createWriteStream('post.csv');
 writeStream.write(`Title,Link,Date \n`);
 
 
-request('https://github.com/sagarika432', (error, response, html) => {
-  if (!error && response.statusCode == 200) {
 
-    //console.log(html);
-    const $ = cheerio.load(html);
-    const no_repositories = $('.UnderlineNav-body') ;
-    console.log(no_repositories.text());
-
-    
-    $('.UnderlineNav-body a').each((i,el)=>{
-       // const item =$(el).text();
-        
-        const key = $(el).attr('title');
-        const x = $(el);
-        //const item1 = $(el).find('span').text();
-        
-        var value='' ;
-        if (x.has('span'))
-            value = (x.children('span').text().replace(/\s\s+/g, ''));
-        else    
-            value ='';
-        console.log(key + " :" + value);
-        
-    });
-
-
-  }
-});
 
 let users = [];
 
