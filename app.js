@@ -20,6 +20,8 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 //load routes
 const users = require('./routes/users');
+const scraping = require('./routes/scraping');
+
 
 
 //Passport Config
@@ -70,7 +72,7 @@ app.set('view engine', 'ejs');
 
 //use routes
 app.use('/users',users);
-
+app.use('/scraping',scraping);
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -87,59 +89,4 @@ app.listen(port,()=>{
 });
 
 app.use('/teacher', teacherRouter);
-app.get('/',(req,res) => {
-    url = 'https://github.com/sagarika432';
-    var json = {
-    
-        result : {}
-        
-        };
-    request('https://github.com/sagarika432', (error, response, html) => {
-    if (!error && response.statusCode == 200) {
 
-
-        //console.log(html);
-        const $ = cheerio.load(html);
-        const no_repositories = $('.UnderlineNav-body') ;
-        console.log(no_repositories.text());
-      
-                 $('.UnderlineNav-body a').each((i,el)=>{
-                           // const item =$(el).text();
-                            
-                            const key = $(el).attr('title');
-                            const x = $(el);
-                            //const item1 = $(el).find('span').text();
-                            
-                            var value='' ;
-                            if (x.has('span'))
-                                value = (x.children('span').text().replace(/\s\s+/g, ''));
-                            else    
-                                value ='';
-                            console.log(key + " :" + value);
-                    
-                           
-                            json.result [key] = value;
-                            
-                        })
-                    }
-                    res.send(JSON.stringify(json));
-    });
-                    
-                
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-    
-});
