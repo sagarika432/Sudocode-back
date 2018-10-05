@@ -20,11 +20,23 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 const users = require('./routes/users');
 const port = process.env.PORT || 3500;
+const scraping = require('./routes/scraping');
 
 const app = express();
 
-app.use(bodyParser.urlencoded({extended:true}));
-app.use(bodyParser.json());
+//Passport Config
+//require('./config/passport')(passport);
+
+
+
+//Passport middleware
+// app.use(passport.initialize());
+// app.use(passport.session());
+
+//passport.use(new passportHttp(verifyCredentials));
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 app.use(session({ secret: 'this-is-a-secret-token', cookie: { maxAge: Date.now() + (30 * 86400 * 1000) }, resave: true,
     saveUninitialized: true}));
@@ -41,8 +53,7 @@ app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Credentials", "true");
     next();
 });
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+
 
 
 app.use( function(req, res, next) {
@@ -58,6 +69,10 @@ app.listen(port,()=>{
 
 app.use('/users',users);
 app.use('/teacher', teacherRouter);
+app.use('/scraping',scraping);
+
+
+
 
 
 
@@ -121,4 +136,3 @@ app.get('/',(req,res) => {
 // app.use(passport.session());
 
 //passport.use(new passportHttp(verifyCredentials));
-
