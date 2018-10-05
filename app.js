@@ -5,27 +5,45 @@ const rp = require('request-promise');
 const Table = require('cli-table');
 const request = require('request');
 const cheerio = require('cheerio');
-
-
 const fs = require('fs');
 const writeStream = fs.createWriteStream('post.csv');
 
-// Write Headers
-writeStream.write(`Title,Link,Date \n`);
+const userRouter = require('./routes/userRouter');
+const teacherRouter = require('./routes/teacherRouter');
 
-
-
-
-let users = [];
-
+var path = require('path');
+var logger = require('morgan');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var session = require('express-session');
 
 const app = express();
-
 const port = process.env.PORT || 3500;
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+// uncomment after placing your favicon in /public
+//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+
+
 app.listen(port,()=>{
     console.log(`Server started on port ${port}`);
 });
 
+app.use('/teacher', teacherRouter);
 app.get('/',(req,res) => {
     url = 'https://github.com/sagarika432';
     var json = {
@@ -66,24 +84,3 @@ app.get('/',(req,res) => {
                     
                 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-    
