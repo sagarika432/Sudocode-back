@@ -5,8 +5,47 @@ const rp = require('request-promise');
 const Table = require('cli-table');
 const request = require('request');
 const cheerio = require('cheerio');
-const fs = require('fs');
-const writeStream = fs.createWriteStream('post.csv');
+var http = require('http');
+var mysql = require('mysql');
+const bodyParser = require('body-parser');
+const passport = require('passport');
+const session = require('express-session');
+const  bcrypt = require('bcryptjs');
+var passportLocal = require('passport-local').Strategy;
+//var passportHttp =require('passport-http').Strategy;
+var expressSession = require('express-session');
+const app = express();
+
+app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.json());
+//load routes
+const users = require('./routes/users');
+
+
+//Passport Config
+//require('./config/passport')(passport);
+
+//express session middleware
+app.use(session({
+    secret: 'secret',
+    resave: true,
+    saveUninitialized: true,
+    
+}));
+
+
+
+//Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+//passport.use(new passportHttp(verifyCredentials));
+
+
+
+//Global variables
+
+
 
 const userRouter = require('./routes/userRouter');
 const teacherRouter = require('./routes/teacherRouter');
@@ -14,10 +53,10 @@ const teacherRouter = require('./routes/teacherRouter');
 var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var session = require('express-session');
 
-const app = express();
+
+
+
 const port = process.env.PORT || 3500;
 
 app.use(function(req, res, next) {
@@ -28,6 +67,10 @@ app.use(function(req, res, next) {
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
+//use routes
+app.use('/users',users);
+
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -83,4 +126,20 @@ app.get('/',(req,res) => {
     });
                     
                 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+    
 });
