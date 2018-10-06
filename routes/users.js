@@ -25,25 +25,28 @@ router.post('/login' ,(req,res) => {
                 res.status(200).json('student');
             }
             else
-                res.status(403).json('Invalid');
+                res.status(200).json('Invalid');
         });
         }).then(function(status) {
             con.query('SELECT password FROM teacher WHERE email = ?', [email], function (err, result, field) {
                 if (err) throw err;
                 if (result.length == 0) {
-                    res.status(403).json("Doesn't exist");
+                    res.status(200).json("Doesn't exist");
                 }
                 else if (result[0].password == password) {
                     req.session.email = email;
                     res.status(200).json('teacher');
                 }
                 else
-                    res.status(403).json('Invalid');
+                    res.status(200).json('Invalid');
             });
         });
 });
 
-
+router.get('/logout', function(req, res){
+    req.session.destroy();
+    res.status(200).end();
+});
 //student register form post
 router.post('/student-register' ,(req,res) => {
     console.log(req.body);
@@ -63,7 +66,8 @@ router.post('/student-register' ,(req,res) => {
     }).then(function(status) {
         con.query('SELECT departmentid FROM department WHERE name = ?', [req.body.departmentid], function (err, result, field) {
             if (err) throw err;
-            departmentid = result[0].name;
+            console.log(result);
+            departmentid = result[0].departmentid;
             return 1;
         });
     }).then(function(status){
@@ -171,6 +175,37 @@ new Promise(function (resolve, reject) {
 });
 });
 
+
+router.post('/links', function(req, res) {
+    var email = req.session.email;
+    var github = req.body.github;
+    var linkedin = req.body.linkedin;
+    var resume = req.body.resume;
+    new Promise(function (resolve, reject) {
+        con.query('UPDATE student SET github = ? WHERE email = ?', [github, email], function (err, result, field) {
+            if (err) throw err;
+            resolve(1);
+        });
+    }).then(function (status) {
+        con.query('UPDATE student SET linkedin = ? WHERE email = ?', [linkedin, email], function (err, result, field) {
+            if (err) throw err;
+            return 1;
+        });
+    }, function(status){}).then(function (status) {
+        con.query('UPDATE student SET resume = ? WHERE email = ?', [resume, email], function (err, result, field) {
+            if (err) throw err;
+            res.status(200).end();
+        });
+    }, function(status){});
+});
+
+router.get('/links', function(req, res){
+    var email = req.session.email;
+    con.query('SELECT github, linkedin, resume FROM student WHERE email = ?', [email], function(err, result, field){
+        if(err) throw err;
+        res.status(200).json(result);
+    });
+});
 //Login 
 // router.post('/login',(req,res ,next) => {
 //     console.log(req.body);

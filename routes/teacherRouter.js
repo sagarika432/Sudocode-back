@@ -13,7 +13,7 @@ router.post('/events', function(req,res) {
 });
 
 router.get('/events', function(req, res){
-    connection.query('SELECT * FROM events NATURAL JOIN enrolment WHERE email = ?', req.session.email, function(err, result, field){
+    connection.query('SELECT * FROM events NATURAL JOIN enrolment WHERE email = ?', [req.session.email], function(err, result, field){
         if(err) throw err;
         console.log(result);
         //console.log(result[0]['']);
@@ -56,34 +56,44 @@ router.post('/lecture', function(req,res) {
 
 router.get('/attendance', function(req, response){
     var email = req.session.email;
+    console.log("in attendance email " + email)
     //var email = "test@test.com";
     var ans = {
 
     };
-    connection.query('SELECT * FROM attendance WHERE email = ?', [email], function(err, result, field){
-        var dbpromise = Promise.resolve();
-        for(var i in result)
-        {
-            (function(index) {
-                ans[result[index].course] = {};
-                dbpromise = dbpromise.then(function () {
-                    return new Promise(function (resolve, reject) {
-                        connection.query('SELECT no_of_lectures FROM course WHERE name = ?', [result[index].course], function (err, res, field) {
-                            if(err) throw err;
-                            ans[result[index].course]["total"] = res[0].no_of_lectures;
-                            ans[result[index].course]["bunked"] = result[index].bunked;
-                            //console.log(index + " " + result.length - 1);
-                            if (index == (result.length - 1))
-                                response.status(200).json(ans);
-                            resolve(1);
-                        });
-                    });
-                });
-            })(i);
-        }
+    connection.query('SELECT a.course, c.no_of_lectures, a.bunked FROM attendance AS a INNER JOIN course AS c ON (a.course = c.name) WHERE a.email = ?;', [email], function(err, result, field){
+        if(err) throw err;
+        response.status(200).json(result);
+        response.end();
+        console.log("a" + result);
     });
-
-});
+    // connection.query('SELECT * FROM attendance WHERE email = ?', [email], function(err, result, field){
+    //     var dbpromise = Promise.resolve();
+    //     var arr = [];
+    //     for(var i in result)
+    //     {
+    //         (function(index) {
+    //             console.log(result[i]);
+    //             ans["subject"] = result[index].course;
+    //             ans["data"] = {};
+    //             dbpromise = dbpromise.then(function () {
+    //                 return new Promise(function (resolve, reject) {
+    //                     connection.query('SELECT no_of_lectures FROM course WHERE name = ?', [result[index].course], function (err, res, field) {
+    //                         if(err) throw err;
+    //                         ans["data"]["total"] = res[0].no_of_lectures;
+    //                         ans["data"]["bunked"] = result[index].bunked;
+    //                         arr.push(ans);
+    //                         console.log(arr);
+    //                         //console.log(index + " " + result.length - 1);
+    //                         if (index == (result.length - 1))
+    //                             response.status(200).json(arr);
+    //                         resolve(1);
+    //                     });
+    //                 });
+    //             });
+    //         })(i);
+    //     }
+    });
 
 router.post('/reference',  function(req, res){
     var link = req.body.link;

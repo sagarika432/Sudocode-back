@@ -44,7 +44,7 @@ app.use(session({ secret: 'this-is-a-secret-token', cookie: { maxAge: Date.now()
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser('this-is-a-secret-token'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function(req, res, next) {
@@ -58,7 +58,8 @@ app.use(function(req, res, next) {
 
 app.use( function(req, res, next) {
     //if(typeof req.session === 'undefined')
-    console.log("session email " + typeof req.session.email === 'undefined'? 'undefined':req.session.email);
+    //console.log("session email " + typeof req.session.email === 'undefined'? 'undefined':req.session.email);
+    console.log("session email " + req.session.email);
     next();
 } );
 

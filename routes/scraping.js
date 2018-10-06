@@ -3,11 +3,13 @@ var http = require('http');
 const request = require('request');
 const cheerio = require('cheerio');
 var router = express.Router();
+var connection = require('../DBconnection');
 module.exports = router;
 
 
-router.get('/github/:githandle',(req,res) => {
-    url = 'https://github.com/'+ req.params.githandle;
+router.get('/github',(req,res) => {
+    url = 'https://github.com/';
+    var email = req.session.email;
     var json = {
     
         result : {
@@ -15,37 +17,41 @@ router.get('/github/:githandle',(req,res) => {
         }
         
         };
-    request(url, (error, response, html) => {
-    if (!error && response.statusCode == 200) {
+    new Promise(function(resolve, reject){
+        connection.query('SELECT github FROM student WHERE email = ?', [email], function(err, result, field){
+            if(err) throw err;
+            resolve(result[0].github);
+        });
+    }).then(function(github){
+        request(url + github, (error, response, html) => {
+            if (!error && response.statusCode == 200) {
+            //console.log(html);
+            const $ = cheerio.load(html);
+            const no_repositories = $('.UnderlineNav-body') ;
+            console.log(no_repositories.text());
 
+            $('.UnderlineNav-body a').each((i,el)=>{
+                // const item =$(el).text();
 
-        //console.log(html);
-        const $ = cheerio.load(html);
-        const no_repositories = $('.UnderlineNav-body') ;
-        console.log(no_repositories.text());
-      
-                 $('.UnderlineNav-body a').each((i,el)=>{
-                           // const item =$(el).text();
-                            
-                            const key = $(el).attr('title');
-                            const x = $(el);
-                            //const item1 = $(el).find('span').text();
-                            
-                            var value='' ;
-                            if (x.has('span'))
-                                value = (x.children('span').text().replace(/\s\s+/g, ''));
-                            else    
-                                value ='';
-                            console.log(key + " :" + value);
-                    
-                           json.result [key] = value;
-                            
-                        })
-                    }
-                    res.send(JSON.stringify(json));
+                const key = $(el).attr('title');
+            const x = $(el);
+            //const item1 = $(el).find('span').text();
+
+            var value='' ;
+            if (x.has('span'))
+                value = (x.children('span').text().replace(/\s\s+/g, ''));
+            else
+                value ='';
+            console.log(key + " :" + value);
+
+            json.result [key] = value;
+
+        });
+            res.status(200).send(JSON.stringify(json));
+        }
     });
- 
-    
+    },function(){});
+
 });
 
 router.get('/linkedin' , (req,res) => {
@@ -86,7 +92,7 @@ router.get('/linkedin' , (req,res) => {
                             
                             var json1  ={
                                 "name" : value,
-                                "link" : key
+                                "link" : "https://internshala.com" + key
                             }
                             json2.push(json1);
                            
@@ -137,7 +143,7 @@ router.get('/hackathons',(req,res) => {
                             //console.log(key + " :" + value);
                             var json1 = {
                                 "name" : value,
-                                "link" : key
+                                "link" : "https://www.hackevents.co/hackathon" + key
                             }
                            
                             json2.push(json1);
