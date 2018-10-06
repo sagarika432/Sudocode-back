@@ -129,10 +129,3 @@ app.get('/',(req,res) => {
 //express session middleware
 
 
-
-
-//Passport middleware
-// app.use(passport.initialize());
-// app.use(passport.session());
-
-//passport.use(new passportHttp(verifyCredentials));
