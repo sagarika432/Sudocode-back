@@ -53,10 +53,14 @@ router.get('/github/:githandle',(req,res) => {
 
 router.get('/linkedin' , (req,res) => {
 
+
     
+    var json2 = [];
     var json = {
     
         result : {
+
+            
             
         }
         
@@ -82,13 +86,19 @@ router.get('/linkedin' , (req,res) => {
                             if (value == 'View Details')
                               value = 'Click on link for more details';
                            // console.log(key + " :" + value);
-                    
+                            
+                            var json1  ={
+                                "name" : value,
+                                "link" : key
+                            }
+                            json2.push(json1);
                            
-                            json.result [value] = key;
+                            //json.result [value] = key;
                             
                         })
                   }
-                    res.send(JSON.stringify(json));
+                  json2.shift();
+                    res.send(JSON.stringify(json2));
     });
  
 
@@ -100,7 +110,9 @@ router.get('/hackathons',(req,res) => {
     url = 'https://www.hackevents.co/hackathons';
     var json = {
     
-        result : {}
+        result : {
+           
+        }
         
         };
     request(url, (error, response, html) => {
