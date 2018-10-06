@@ -52,29 +52,44 @@ router.post('/student-register' ,(req,res) => {
         result : {}
         
     };
-    var checkduplicate = "select * from student where email = '" + req.body.email + "'";
-    con.query(checkduplicate,function(err,result)
-    {
-        
-        if(result.length > 0 )
-        {
-            json.result="Email id alerady in use";
-            res.send(JSON.stringify(json));
-        }
-        else{
-            
-            var query ="INSERT into student(email, fname, lname, password, collegeid, start_year, departmentid) values ('" + req.body.email+ "' ,'" +req.body.fname + "' , '" +  req.body.lname + "' ,'" + req.body.password + "' , '" + req.body.collegeid + "' , '" + req.body.start_year + "' , '" + req.body.collegeid +  "' );" ;
-            console.log(query);
-            con.query(query,function(err,result) {
-                if(err)
-                    //.result="Invalid Data !";
-                    throw err ;
-                else    
-                    json.result="Successfully Registered !";
-                res.status(200).send(JSON.stringify(json));
-            });
-        }    
-    });
+    var collegeid;
+    var departmentid;
+    new Promise(function(resolve, reject){
+        con.query('SELECT collegeid FROM college WHERE name = ?', [req.body.collegeid], function(err, result, field){
+            if(err) throw err;
+            collegeid = result[0].collegeid;
+            resolve(1);
+        });
+    }).then(function(status) {
+        con.query('SELECT departmentid FROM department WHERE name = ?', [req.body.departmentid], function (err, result, field) {
+            if (err) throw err;
+            departmentid = result[0].name;
+            return 1;
+        });
+    }).then(function(status){
+                var checkduplicate = "select * from student where email = '" + req.body.email + "'";
+                con.query(checkduplicate,function(err,result)
+                {
+                    if(err) throw err;
+                    if(result.length > 0 )
+                    {
+                        json.result="Email id alerady in use";
+                        res.send(JSON.stringify(json));
+                    }
+                    else{
+                        var query ="INSERT into student(email, fname, lname, password, collegeid, start_year, departmentid) values ('" + req.body.email+ "' ,'" +req.body.fname + "' , '" +  req.body.lname + "' ,'" + req.body.password + "' , '" + collegeid + "' , '" + req.body.start_year + "' , '" + departmentid +  "' );" ;
+                        console.log(query);
+                        con.query(query,function(err,result) {
+                            if(err)
+                            //.result="Invalid Data !";
+                                throw err ;
+                            else
+                                json.result="Successfully Registered !";
+                            res.status(200).send(JSON.stringify(json));
+                        });
+                    }
+                });
+            }, function() {});
 });
 
 
@@ -113,34 +128,47 @@ router.post('/college-register' ,(req,res) => {
 
 router.post('/teacher-register' ,(req,res) => {
     console.log(req.body);
-    var json = {
-    
-        result : {}
-        
-    };
+var json = {
+
+    result: {}
+
+};
+var collegeid;
+var departmentid;
+new Promise(function (resolve, reject) {
+    con.query('SELECT collegeid FROM college WHERE name = ?', [req.body.collegeid], function (err, result, field) {
+        if (err) throw err;
+        collegeid = result[0].collegeid;
+        resolve(1);
+    });
+}).then(function (status) {
+    con.query('SELECT departmentid FROM department WHERE name = ?', [req.body.departmentid], function (err, result, field) {
+        if (err) throw err;
+        departmentid = result[0].departmentid;
+        return 1;
+    });
+}).then(function (status) {
     var checkduplicate = "select * from teacher where email = '" + req.body.email + "'";
     console.log(checkduplicate);
-    con.query(checkduplicate,function(err,result)
-    {
-        if(result.length > 0)
-      {
-          json.result="Teacher is alerady registered";
-          res.status(200).send(JSON.stringify(json));
-       }
-       else
-        {
-            var query ="INSERT into teacher(fname, lname, departmentid, collegeid, email, password) values ('" + req.body.fname+ "' ,'" +req.body.lname + "' , '" + req.body.departmentid + "' ,'" +req.body.collegeid + "' , '" + req.body.email+ "' , '" +  req.body.password+ "' )" ;
+    con.query(checkduplicate, function (err, result) {
+        if (result.length > 0) {
+            json.result = "Teacher is alerady registered";
+            res.status(200).send(JSON.stringify(json));
+        }
+        else {
+            var query = "INSERT into teacher(fname, lname, departmentid, collegeid, email, password) values ('" + req.body.fname + "' ,'" + req.body.lname + "' , '" + departmentid + "' ,'" + collegeid + "' , '" + req.body.email + "' , '" + req.body.password + "' )";
             console.log(query);
 
-            con.query(query,function(err,result) {
-                if(err)
-                    json.result="Invalid Data !";
+            con.query(query, function (err, result) {
+                if (err)
+                    throw err;
                 else
-                    json.result="Successfully Registered !";
+                    json.result = "Successfully Registered !";
                 res.status(200).send(JSON.stringify(json));
             });
         }
-     });
+    });
+});
 });
 
 //Login 
