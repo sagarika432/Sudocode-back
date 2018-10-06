@@ -108,6 +108,7 @@ router.get('/linkedin' , (req,res) => {
 
 router.get('/hackathons',(req,res) => {
     url = 'https://www.hackevents.co/hackathons';
+    var json2 = [] ;
     var json = {
     
         result : {
@@ -136,14 +137,17 @@ router.get('/hackathons',(req,res) => {
                              //   value = (x.children('span').text().replace(/\s\s+/g, ''));
                            // else    
                              //   value ='';
-                            console.log(key + " :" + value);
-                    
+                            //console.log(key + " :" + value);
+                            var json1 = {
+                                "name" : value,
+                                "link" : key
+                            }
                            
-                            json.result [value] = key;
+                            json2.push(json1);
                             
                         })
                     }
-                    res.send(JSON.stringify(json));
+                    res.send(JSON.stringify(json2));
     });
  
     
