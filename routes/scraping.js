@@ -11,8 +11,7 @@ router.get('/github/:githandle',(req,res) => {
     var json = {
     
         result : {
-            name : {} ,
-            value : {}
+            
         }
         
         };
@@ -39,9 +38,7 @@ router.get('/github/:githandle',(req,res) => {
                                 value ='';
                             console.log(key + " :" + value);
                     
-                           json.result .name = key;
-                           
-                            json.result.value = value;
+                           json.result [key] = value;
                             
                         })
                     }
