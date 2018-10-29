@@ -68,6 +68,7 @@ app.listen(port,()=>{
     console.log(`Server started on port ${port}`);
 });
 
+
 app.use('/users',users);
 app.use('/teacher', teacherRouter);
 app.use('/scraping',scraping);
